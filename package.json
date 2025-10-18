@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/DailyFrame13/dailyframe_backend#readme",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "express": "^5.0.0"
   },
   "devDependencies": {
