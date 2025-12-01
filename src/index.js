@@ -88,17 +88,17 @@ app.use(
 
 app.get("/openapi.json", async (req, res, next) => {
   const options = {
-    openapi: "3.0.0",
     disableLogs: true,
     writeOutputFile: false,
   };
   const outputFile = "/dev/null";
-  const routes = ["src/index.js"]; // 파일 위치에 따라 "./index.js" 일 수 있음
+  const routes = ["src/index.js"]; 
   const doc = {
     info: {
       title: "DailyFrame API",
       description: "AI Diary Generator",
     },
+    openapi: "3.0.0",
     host: req.get("host"), 
     schemes: ["https", "http"], 
   };
