@@ -82,7 +82,8 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "DailyFrame API",
       description: "AI Diary Generator",
     },
-    host: "localhost:3000",
+    host: req.get("host"), 
+    schemes: ["https", "http"], 
   };
   const result = await swaggerAutogen(options)(outputFile, routes, doc);
   res.json(result ? result.data : null);
