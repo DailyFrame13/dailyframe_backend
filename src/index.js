@@ -14,7 +14,6 @@ const port = process.env.PORT || 3000;
 
 const upload = multer({ dest: 'uploads/' });
 
-// 응답 헬퍼 함수들
 app.use((req, res, next) => {
   res.success = (success) => {
     return res.json({ resultType: "SUCCESS", error: null, success });
@@ -39,31 +38,30 @@ app.get("/", (req, res) => {
 });
 
 /* #swagger.consumes = ['multipart/form-data']
-   #swagger.requestBody = {
-       required: true,
-       content: {
-           "multipart/form-data": {
-               schema: {
-                   type: "object",
-                   properties: {
-                       files: {
-                           type: "array",
-                           items: {
-                               type: "string",
-                               format: "binary"
-                           },
-                           description: "업로드할 이미지 파일들 (여러 장 선택 가능)"
-                       }
-                   }
-               }
-           }
-       }
-   } 
+    #swagger.autoBody = false
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "multipart/form-data": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        files: {
+                            type: "array",
+                            items: {
+                                type: "string",
+                                format: "binary"
+                            },
+                            description: "업로드할 이미지 파일들 (여러 장 선택 가능)"
+                        }
+                    }
+                }
+            }
+        }
+    } 
 */
-// ✅ [중요] 'files'라는 이름으로 최대 3장까지 허용
-app.post("/api/v1/generate", upload.array('files', 3), generateDiary);
+app.post("/api/generate", upload.array('files', 3), generateDiary);
 
-// 에러 핸들러
 app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
@@ -75,7 +73,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Swagger 설정
 app.use(
   "/docs",
   swaggerUiExpress.serve,
@@ -98,7 +95,6 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "DailyFrame API",
       description: "AI Diary Generator",
     },
-    // ✅ 3.0.0 명시
     openapi: "3.0.0",
     host: req.get("host"), 
     schemes: ["https", "http"], 
@@ -106,8 +102,6 @@ app.get("/openapi.json", async (req, res, next) => {
   
   const result = await swaggerAutogen(options)(outputFile, routes, doc);
 
-  // 🚨 [핵심 수정] 라이브러리가 자동으로 생성한 'swagger: "2.0"' 필드를 강제로 삭제합니다.
-  // 이렇게 해야 'openapi: "3.0.0"'과 충돌하지 않습니다.
   if (result && result.data) {
       delete result.data.swagger; 
   }
