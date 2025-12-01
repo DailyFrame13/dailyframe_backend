@@ -2,6 +2,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import { handleUserSignUp } from "./controllers/user.controller.js";
+// ✅ 1. 새로운 컨트롤러와 multer 임포트
+import { generateDiary } from "./controllers/ai.controller.js";
+import multer from "multer";
+
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
 
@@ -10,9 +14,9 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT;
 
-/**
- * 공통 응답을 사용할 수 있는 헬퍼 함수 등록
- */
+// ✅ 2. Multer 설정 (파일 임시 저장소)
+const upload = multer({ dest: 'uploads/' });
+
 app.use((req, res, next) => {
   res.success = (success) => {
     return res.json({ resultType: "SUCCESS", error: null, success });
@@ -40,9 +44,10 @@ app.get("/", (req, res) => {
 
 app.post("/api/v1/users/signup", handleUserSignUp);
 
-/**
- * 전역 오류를 처리하기 위한 미들웨어
- */
+// ✅ 3. [NEW] AI 이미지 생성 라우트 추가
+// 'file'은 프론트엔드에서 보낼 때 사용하는 키 이름입니다.
+app.post("/api/v1/generate", upload.single('file'), generateDiary);
+
 app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
@@ -54,6 +59,7 @@ app.use((err, req, res, next) => {
     data: err.data || null,
   });
 });
+
 
 app.use(
   "/docs",
