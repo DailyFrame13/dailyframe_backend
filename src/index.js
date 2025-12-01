@@ -61,7 +61,7 @@ app.get("/", (req, res) => {
    } 
 */
 // ✅ [중요] 'files'라는 이름으로 최대 3장까지 허용
-app.post("/api/v1/generate", upload.array('files', 3), generateDiary);
+app.post("/api/generate", upload.array('files', 3), generateDiary);
 
 // 에러 핸들러
 app.use((err, req, res, next) => {
