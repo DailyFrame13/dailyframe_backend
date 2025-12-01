@@ -6,6 +6,8 @@ import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
 
 import { generateDiary } from "./controllers/ai.controller.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -37,31 +39,31 @@ app.get("/", (req, res) => {
   res.send("DailyFrame Backend is Running!");
 });
 
-/**
- * @swagger
- * /api/v1/generate:
- *   post:
- *     summary: DailyFrame 포스터 생성
- *     description: 최대 3장의 이미지를 업로드하면 AI가 일기를 생성하고 포스터를 제작합니다.
- *     consumes:
- *       - multipart/form-data
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               files:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *                 description: 업로드할 이미지 파일들 (최대 3장)
- *     responses:
- *       200:
- *         description: 성공적으로 결과 이미지 반환
- */
+/* #swagger.summary = 'DailyFrame 포스터 생성'
+    #swagger.description = '최대 3장의 이미지를 업로드하면 AI가 일기를 생성하고 포스터를 제작합니다.'
+    #swagger.consumes = ['multipart/form-data']
+    #swagger.autoBody = false
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "multipart/form-data": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        files: {
+                            type: "array",
+                            items: {
+                                type: "string",
+                                format: "binary"
+                            },
+                            description: "업로드할 이미지 파일들 (최대 3장)"
+                        }
+                    }
+                }
+            }
+        }
+    } 
+*/
 app.post("/api/v1/generate", upload.array("files", 3), generateDiary);
 
 app.use((err, req, res, next) => {
@@ -85,13 +87,19 @@ app.use(
   })
 );
 
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.get("/openapi.json", async (req, res, next) => {
   const options = {
     disableLogs: true,
     writeOutputFile: false,
   };
   const outputFile = "/dev/null";
-  const routes = ["src/index.js"]; 
+  
+  const routes = [__filename]; 
+  
   const doc = {
     info: {
       title: "DailyFrame API",
