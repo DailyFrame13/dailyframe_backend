@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000;
 
 const upload = multer({ dest: 'uploads/' });
 
-
+// 응답 헬퍼 함수들
 app.use((req, res, next) => {
   res.success = (success) => {
     return res.json({ resultType: "SUCCESS", error: null, success });
@@ -39,15 +39,31 @@ app.get("/", (req, res) => {
 });
 
 /* #swagger.consumes = ['multipart/form-data']
-  #swagger.parameters['file'] = {
-      in: 'formData',
-      type: 'file',
-      required: true,
-      description: '업로드할 이미지 파일'
-  } 
+   #swagger.requestBody = {
+       required: true,
+       content: {
+           "multipart/form-data": {
+               schema: {
+                   type: "object",
+                   properties: {
+                       files: {
+                           type: "array",
+                           items: {
+                               type: "string",
+                               format: "binary"
+                           },
+                           description: "업로드할 이미지 파일들 (여러 장 선택 가능)"
+                       }
+                   }
+               }
+           }
+       }
+   } 
 */
-app.post("/api/v1/generate", upload.single('file'), generateDiary);
+// ✅ [중요] 'files'라는 이름으로 최대 3장까지 허용
+app.post("/api/v1/generate", upload.array('files', 3), generateDiary);
 
+// 에러 핸들러
 app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
@@ -59,6 +75,7 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Swagger 설정
 app.use(
   "/docs",
   swaggerUiExpress.serve,
@@ -76,7 +93,7 @@ app.get("/openapi.json", async (req, res, next) => {
     writeOutputFile: false,
   };
   const outputFile = "/dev/null";
-  const routes = ["src/index.js"];
+  const routes = ["src/index.js"]; // 파일 위치에 따라 "./index.js" 일 수 있음
   const doc = {
     info: {
       title: "DailyFrame API",
