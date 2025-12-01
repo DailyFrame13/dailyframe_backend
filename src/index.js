@@ -4,10 +4,10 @@ import express from "express";
 import multer from "multer";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
-
-import { generateDiary } from "./controllers/ai.controller.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+import { generateDiary } from "./controllers/ai.controller.js";
 
 dotenv.config();
 
@@ -40,29 +40,16 @@ app.get("/", (req, res) => {
 });
 
 /* #swagger.summary = 'DailyFrame 포스터 생성'
-    #swagger.description = '최대 3장의 이미지를 업로드하면 AI가 일기를 생성하고 포스터를 제작합니다.'
+    #swagger.description = '이미지를 업로드하면 AI가 일기를 생성합니다.'
     #swagger.consumes = ['multipart/form-data']
-    #swagger.autoBody = false
-    #swagger.requestBody = {
+    #swagger.parameters['files'] = {
+        in: 'formData',
+        type: 'array',
         required: true,
-        content: {
-            "multipart/form-data": {
-                schema: {
-                    type: "object",
-                    properties: {
-                        files: {
-                            type: "array",
-                            items: {
-                                type: "string",
-                                format: "binary"
-                            },
-                            description: "업로드할 이미지 파일들 (최대 3장)"
-                        }
-                    }
-                }
-            }
-        }
-    } 
+        description: '업로드할 이미지 파일들 (최대 3장)',
+        collectionFormat: 'multi',
+        items: { type: 'file' }
+    }
 */
 app.post("/api/v1/generate", upload.array("files", 3), generateDiary);
 
@@ -87,7 +74,6 @@ app.use(
   })
 );
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -98,6 +84,7 @@ app.get("/openapi.json", async (req, res, next) => {
   };
   const outputFile = "/dev/null";
   
+  
   const routes = [__filename]; 
   
   const doc = {
@@ -105,11 +92,11 @@ app.get("/openapi.json", async (req, res, next) => {
       title: "DailyFrame API",
       description: "AI Diary Generator",
     },
-    openapi: "3.0.0",
+    openapi: "3.0.0", 
     host: req.get("host"), 
     schemes: ["https", "http"], 
   };
-  
+
   const result = await swaggerAutogen(options)(outputFile, routes, doc);
 
   if (result && result.data) {
